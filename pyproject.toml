@@ -1,0 +1,15 @@
+[project]
+name = "reddit-mood"
+description = "Visualise upvote ratio over time in selected subreddits"
+requires-python = ">=3.9"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+
+[tool.mypy]
+ignore_missing_imports = true
+
+[tool.black]
+line-length = 120
+target_version = ['py39']
+include = '\.pyi?$'
