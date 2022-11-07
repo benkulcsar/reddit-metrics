@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+from datetime import datetime
 
 import config as config
 from clients.reddit_client import AbstractRedditClient
@@ -14,7 +15,12 @@ from utils import is_aws_env
 
 
 POST_FETCH_COUNT = 100
-S3_DATA_PREFIX = "reddit-posts"
+
+if is_aws_env():
+    S3_DATA_PREFIX = "reddit-posts"
+else:
+    S3_DATA_PREFIX = "reddit-posts-local-run"
+
 
 if logging.getLogger().hasHandlers():
     logging.getLogger().setLevel(logging.INFO)
@@ -67,11 +73,15 @@ def fetch_new_submissions_from_reddit(
     return submission_list
 
 
-def upload_reddit_posts_to_s3(s3_client: AbstractS3Client, reddit_post_list: list[RedditPost]) -> None:
+def upload_reddit_posts_to_s3(
+    s3_client: AbstractS3Client,
+    reddit_post_list: list[RedditPost],
+    exec_datetime: datetime,
+) -> None:
     """
     Builds the S3 prefix and object name and uploads a list of reddit posts to S3 using the s3_client.
     """
-    s3_object_name, partition_prefix = get_s3_object_name_and_partition_prefix()
+    s3_object_name, partition_prefix = get_s3_object_name_and_partition_prefix(dt=exec_datetime)
     s3_full_prefix = S3_DATA_PREFIX + "/" + partition_prefix
     s3_client.upload_dataclass_object_list_to_s3(
         dataclass_object_list=reddit_post_list,
@@ -83,6 +93,9 @@ def upload_reddit_posts_to_s3(s3_client: AbstractS3Client, reddit_post_list: lis
 
 def extract() -> None:
     logger.info("Starting extract task")
+
+    exec_datetime = datetime.utcnow()
+    logger.info(f"""Execution time (UTC): {exec_datetime.isoformat(sep=" ", timespec='seconds')}""")
 
     logger.info("Connecting to Reddit API")
     reddit_client = RedditClient(
@@ -104,6 +117,7 @@ def extract() -> None:
     upload_reddit_posts_to_s3(
         s3_client=s3_client,
         reddit_post_list=reddit_post_list,
+        exec_datetime=exec_datetime,
     )
 
     logger.info("Extract task done")

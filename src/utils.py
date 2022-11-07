@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
-from typing import Optional
 
 
 def estimate_downvotes(upvotes: int, upvote_ratio: float) -> int:
@@ -28,13 +27,11 @@ def get_date_parts_from_datetime(dt: datetime) -> tuple[str, str, str, str]:
     return year, month, day, hour
 
 
-def get_s3_object_name_and_partition_prefix(dt: Optional[datetime] = None) -> tuple[str, str]:
+def get_s3_object_name_and_partition_prefix(dt: datetime) -> tuple[str, str]:
     """
     Assuming partitioning by year+month+day, using the hour as the object (file) name
     and saving in csv format: the method returns an S3 prefix for the partition and a name for the object (file).
     """
-    if not dt:
-        dt = datetime.utcnow()
     year, month, day, hour = get_date_parts_from_datetime(dt)
     partition_prefix = f"year={year}/month={month}/day={day}"
     object_name = f"hour={hour}.csv"
