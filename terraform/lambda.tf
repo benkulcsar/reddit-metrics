@@ -4,8 +4,9 @@ resource "aws_lambda_function" "reddit_extract_lambda" {
   role             = aws_iam_role.reddit_extract_lambda_role.arn
   handler          = "extract.lambda_handler"
   runtime          = "python3.9"
-  timeout          = "300"
+  timeout          = "900"
   source_code_hash = filebase64sha256("../extract_lambda.zip")
+  memory_size      = 256
 
   ephemeral_storage {
     size = 512
