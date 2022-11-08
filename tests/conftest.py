@@ -14,7 +14,7 @@ def reddit_submission():
         "downs": 0,
         "total_awards_received": 0,
         "created_utc": 1.0,
-        "extracted_utc": 1.0,
+        "extracted_utc": 1667920961.127697,
     }
 
 
@@ -29,5 +29,9 @@ def reddit_post():
         downvotes_estimated=1,
         awards=0,
         created_utc=1.0,
-        extracted_utc=1.0,
+        extracted_utc=1667920961.127697,
+        year="2022",
+        month="11",
+        day="08",
+        hour="15",
     )

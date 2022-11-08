@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from datetime import datetime
+from datetime import timedelta
 
 
 def estimate_downvotes(upvotes: int, upvote_ratio: float) -> int:
@@ -43,3 +44,40 @@ def is_aws_env() -> bool:
     True if running in AWS (e.g. lambda), otherwise false.
     """
     return os.environ.get("AWS_EXECUTION_ENV") is not None
+
+
+# TEST!
+def get_previous_s3_key(key: str) -> str:
+    year_start = key.find("year=") + len("year=")
+    year_end = year_start + 4
+
+    month_start = key.find("month=") + len("month=")
+    month_end = month_start + 2
+
+    day_start = key.find("day=") + len("day=")
+    day_end = day_start + 2
+
+    hour_start = key.find("hour=") + len("hour=")
+    hour_end = hour_start + 2
+
+    dt = datetime(
+        int(key[year_start:year_end]),
+        int(key[month_start:month_end]),
+        int(key[day_start:day_end]),
+        int(key[hour_start:hour_end]),
+    )
+
+    previous_dt = dt + timedelta(hours=-1)
+
+    previous_key = (
+        key[0:year_start]
+        + str(previous_dt.year)
+        + key[year_end:month_start]
+        + str(previous_dt.month).zfill(2)
+        + key[month_end:day_start]
+        + str(previous_dt.day).zfill(2)
+        + key[day_end:hour_start]
+        + str(previous_dt.hour).zfill(2)
+        + key[hour_end:]
+    )
+    return previous_key

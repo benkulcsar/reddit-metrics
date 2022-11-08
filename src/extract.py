@@ -17,9 +17,9 @@ from utils import is_aws_env
 POST_FETCH_COUNT = 100
 
 if is_aws_env():
-    S3_DATA_PREFIX = "reddit-posts"
+    S3_EXTRACT_PREFIX = "reddit-posts"
 else:
-    S3_DATA_PREFIX = "reddit-posts-local-run"
+    S3_EXTRACT_PREFIX = "reddit-posts-local-run"
 
 
 if logging.getLogger().hasHandlers():
@@ -36,6 +36,7 @@ def convert_submission_to_reddit_post(submission: dict) -> RedditPost:
 
     # Reddit API doesn't send the number of downvotes, so it is estimated.
     downvotes_estimated = estimate_downvotes(upvotes=submission["ups"], upvote_ratio=submission["upvote_ratio"])
+    post_dt = datetime.utcfromtimestamp(submission.get("extracted_utc", 0.0))
 
     reddit_post = RedditPost(
         post_id=submission["id"],
@@ -47,6 +48,10 @@ def convert_submission_to_reddit_post(submission: dict) -> RedditPost:
         awards=submission.get("total_awards_received", 0),
         created_utc=submission.get("created_utc", 0.0),
         extracted_utc=submission.get("extracted_utc", 0.0),
+        year=str(post_dt.year),
+        month=str(post_dt.month).zfill(2),
+        day=str(post_dt.day).zfill(2),
+        hour=str(post_dt.hour).zfill(2),
     )
     return reddit_post
 
@@ -82,7 +87,7 @@ def upload_reddit_posts_to_s3(
     Builds the S3 prefix and object name and uploads a list of reddit posts to S3 using the s3_client.
     """
     s3_object_name, partition_prefix = get_s3_object_name_and_partition_prefix(dt=exec_datetime)
-    s3_full_prefix = S3_DATA_PREFIX + "/" + partition_prefix
+    s3_full_prefix = S3_EXTRACT_PREFIX + "/" + partition_prefix
     s3_client.upload_dataclass_object_list_to_s3(
         dataclass_object_list=reddit_post_list,
         s3_bucket_name=config.get_s3_bucket_name(),

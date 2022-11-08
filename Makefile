@@ -9,8 +9,11 @@ pytest:
 pre-commit:
 	pre-commit run --all-files
 
-run-extract:
+extract:
 	python src/extract.py
+
+transform:
+	python src/transform.py
 
 terraform-init:
 	cd terraform; terraform init -backend-config=backend.tfvars -migrate-state

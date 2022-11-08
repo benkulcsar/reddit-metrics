@@ -5,6 +5,7 @@ from abc import abstractmethod
 from typing import TYPE_CHECKING
 
 import boto3
+from dataclass_csv import DataclassReader
 from dataclass_csv import DataclassWriter
 
 if TYPE_CHECKING:
@@ -45,6 +46,21 @@ class S3Client(AbstractS3Client):
 
         s3_object_name_with_prefix = f"{s3_prefix}/{s3_object_name}"
         self.s3_client.upload_file(file_name_with_path, s3_bucket_name, s3_object_name_with_prefix)
+
+    def download_from_s3_to_dataclass_object_list(
+        self,
+        dataclass_type: type[BaseDataclass],
+        s3_bucket_name: str,
+        s3_object_key: str,
+    ) -> list[BaseDataclass]:
+
+        file_name_with_path = "/tmp/from_s3.csv"
+        self.s3_client.download_file(s3_bucket_name, s3_object_key, file_name_with_path)
+
+        with open(file_name_with_path, "r") as file:
+            dataclass_list = list(DataclassReader(file, dataclass_type))
+
+        return dataclass_list
 
 
 class FakeS3Client(ABC):

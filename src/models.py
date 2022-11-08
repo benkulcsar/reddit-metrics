@@ -5,7 +5,10 @@ from dataclasses import dataclass
 
 @dataclass
 class BaseDataclass:
-    pass
+    year: str
+    month: str
+    day: str
+    hour: str
 
 
 @dataclass
@@ -19,3 +22,12 @@ class RedditPost(BaseDataclass):
     awards: int
     created_utc: float
     extracted_utc: float
+
+
+@dataclass
+class RedditStat(BaseDataclass):
+    subreddit_name: str
+    new_upvotes: int
+    new_downvotes: int
+    upvote_ratio: float
+    transformed_utc: float

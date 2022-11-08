@@ -7,7 +7,7 @@ from clients.reddit_client import FakeRedditClient
 from clients.s3_client import FakeS3Client
 from extract import convert_submission_to_reddit_post
 from extract import fetch_new_submissions_from_reddit
-from extract import S3_DATA_PREFIX
+from extract import S3_EXTRACT_PREFIX
 from extract import upload_reddit_posts_to_s3
 from utils import get_s3_object_name_and_partition_prefix
 
@@ -38,6 +38,6 @@ def test_upload_reddit_posts_to_s3(reddit_post):
 
     bucket_name = config.get_s3_bucket_name()
     name, prefix = get_s3_object_name_and_partition_prefix(dt=exec_datetime)
-    expected_key = f"{bucket_name}/{S3_DATA_PREFIX}/{prefix}/{name}"
+    expected_key = f"{bucket_name}/{S3_EXTRACT_PREFIX}/{prefix}/{name}"
 
     assert fake_s3_client.uploaded.get(expected_key) == [reddit_post]
