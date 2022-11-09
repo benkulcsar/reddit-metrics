@@ -25,9 +25,9 @@ class RedditPost(BaseDataclass):
 
 
 @dataclass
-class RedditStat(BaseDataclass):
+class RedditMetricSet(BaseDataclass):
     subreddit_name: str
-    new_upvotes: int
-    new_downvotes: int
+    upvotes: int
+    downvotes: int
     upvote_ratio: float
     transformed_utc: float

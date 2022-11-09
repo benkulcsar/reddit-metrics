@@ -28,15 +28,19 @@ def get_date_parts_from_datetime(dt: datetime) -> tuple[str, str, str, str]:
     return year, month, day, hour
 
 
-def get_s3_object_name_and_partition_prefix(dt: datetime) -> tuple[str, str]:
+def get_s3_object_key(prefix: str, dt: datetime) -> str:
     """
-    Assuming partitioning by year+month+day, using the hour as the object (file) name
-    and saving in csv format: the method returns an S3 prefix for the partition and a name for the object (file).
+    Assuming partitioning by year+month+day, using the hour as the object (file) name and saving in csv format:
+    the method returns an S3 object key based on a prefix and a datetime object.
     """
     year, month, day, hour = get_date_parts_from_datetime(dt)
     partition_prefix = f"year={year}/month={month}/day={day}"
     object_name = f"hour={hour}.csv"
-    return object_name, partition_prefix
+
+    if len(prefix) > 0:
+        return f"{prefix}/{partition_prefix}/{object_name}"
+    else:
+        return f"{partition_prefix}/{object_name}"
 
 
 def is_aws_env() -> bool:

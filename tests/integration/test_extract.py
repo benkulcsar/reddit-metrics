@@ -2,24 +2,24 @@ from __future__ import annotations
 
 from datetime import datetime
 
-import config as config
-from clients.reddit_client import FakeRedditClient
-from clients.s3_client import FakeS3Client
+import common.config as config
+from common.reddit_client import FakeRedditClient
+from common.s3_client import FakeS3Client
+from common.utils import get_s3_object_key
 from extract import convert_submission_to_reddit_post
 from extract import fetch_new_submissions_from_reddit
 from extract import S3_EXTRACT_PREFIX
 from extract import upload_reddit_posts_to_s3
-from utils import get_s3_object_name_and_partition_prefix
 
 
-def test_extract(reddit_submission, reddit_post):
+def test_extract(reddit_submissions, reddit_posts):
     exec_datetime = datetime(2022, 10, 1, 2, 15)
 
-    fake_reddit_client = FakeRedditClient([reddit_submission])
+    fake_reddit_client = FakeRedditClient(reddit_submissions)
     fake_s3_client = FakeS3Client()
     reddit_submission_list = fetch_new_submissions_from_reddit(
         reddit_client=fake_reddit_client,
-        subreddit_list=["r/def"],
+        subreddit_list=["r/abc", "r/def"],
     )
 
     reddit_post_list = [convert_submission_to_reddit_post(submission) for submission in reddit_submission_list]
@@ -33,7 +33,7 @@ def test_extract(reddit_submission, reddit_post):
     assert len(fake_s3_client.uploaded) == 1
 
     bucket_name = config.get_s3_bucket_name()
-    name, prefix = get_s3_object_name_and_partition_prefix(dt=exec_datetime)
-    expected_key = f"{bucket_name}/{S3_EXTRACT_PREFIX}/{prefix}/{name}"
+    object_key = get_s3_object_key(dt=exec_datetime, prefix=S3_EXTRACT_PREFIX)
+    expected_key = f"{bucket_name}/{object_key}"
 
-    assert fake_s3_client.uploaded.get(expected_key) == [reddit_post]
+    assert fake_s3_client.uploaded.get(expected_key) == reddit_posts

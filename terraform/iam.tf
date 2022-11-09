@@ -1,5 +1,5 @@
-resource "aws_iam_role" "reddit_extract_lambda_role" {
-  name               = "reddit-extract-lambda-role"
+resource "aws_iam_role" "reddit_lambda_role" {
+  name               = "reddit-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   inline_policy {
     name   = "log_and_access_s3"

@@ -1,7 +1,28 @@
 [project]
-name = "reddit-mood"
-description = "Visualise upvote ratio over time in selected subreddits"
+name = "reddit-metrics"
+description = "Visualise aggregated metrics of selected subreddits"
 requires-python = ">=3.9"
+version = "0.0.1"
+dependencies = [
+    "boto3==1.24.75",
+    "dataclass-csv==1.4.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "mypy==0.982",
+    "pre-commit==2.20.0",
+    "mypy==0.910",
+    "pytest==7.1.3",
+]
+
+extract = [
+    "praw==7.6.0",
+]
+
+transform = [
+    "pandas==1.5.1",
+]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]

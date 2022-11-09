@@ -18,11 +18,22 @@ class AbstractS3Client(ABC):
         self,
         dataclass_object_list: list[BaseDataclass],
         s3_bucket_name: str,
-        s3_prefix: str,
-        s3_object_name: str,
+        s3_object_key: str,
     ) -> None:
         """
         Saves a list of dataclass objects in a csv file in /tmp/ and uploads the file to s3.
+        """
+        pass
+
+    @abstractmethod
+    def download_from_s3_to_dataclass_object_list(
+        self,
+        dataclass_type: type[BaseDataclass],
+        s3_bucket_name: str,
+        s3_object_key: str,
+    ) -> list[BaseDataclass]:
+        """
+        Downloads a csv file from S3, saves it in /tmp/ and converts it into a list of dataclass objects
         """
         pass
 
@@ -35,17 +46,15 @@ class S3Client(AbstractS3Client):
         self,
         dataclass_object_list: list[BaseDataclass],
         s3_bucket_name: str,
-        s3_prefix: str,
-        s3_object_name: str,
+        s3_object_key: str,
     ) -> None:
 
-        file_name_with_path = "/tmp/" + s3_object_name
+        file_name_with_path = "/tmp/to_s3.csv"
         with open(file_name_with_path, "w") as file:
             writer = DataclassWriter(file, dataclass_object_list, type(dataclass_object_list[0]))
             writer.write()
 
-        s3_object_name_with_prefix = f"{s3_prefix}/{s3_object_name}"
-        self.s3_client.upload_file(file_name_with_path, s3_bucket_name, s3_object_name_with_prefix)
+        self.s3_client.upload_file(file_name_with_path, s3_bucket_name, s3_object_key)
 
     def download_from_s3_to_dataclass_object_list(
         self,
@@ -71,7 +80,14 @@ class FakeS3Client(ABC):
         self,
         dataclass_object_list: list[BaseDataclass],
         s3_bucket_name: str,
-        s3_prefix: str,
-        s3_object_name: str,
+        s3_object_key: str,
     ) -> None:
-        self.uploaded[f"{s3_bucket_name}/{s3_prefix}/{s3_object_name}"] = dataclass_object_list
+        self.uploaded[f"{s3_bucket_name}/{s3_object_key}"] = dataclass_object_list
+
+    def download_from_s3_to_dataclass_object_list(
+        self,
+        dataclass_type: type[BaseDataclass],
+        s3_bucket_name: str,
+        s3_object_key: str,
+    ) -> list[BaseDataclass]:
+        return self.uploaded[f"{s3_bucket_name}/{s3_object_key}"]

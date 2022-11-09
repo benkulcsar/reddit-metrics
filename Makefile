@@ -1,30 +1,22 @@
-test: mypy pytest
-
-mypy:
-	mypy . --ignore-missing-imports
-
-pytest:
-	pytest
-
 pre-commit:
 	pre-commit run --all-files
 
 extract:
 	python src/extract.py
 
-transform:
-	python src/transform.py
-
 terraform-init:
 	cd terraform; terraform init -backend-config=backend.tfvars -migrate-state
 
-create-extract-lambda:
-	rm -rf ./extract_lambda extract_lambda.zip
-	mkdir extract_lambda
-	pip install $$(cat requirements.txt | grep -v boto) --target ./extract_lambda
-	cp -r ./src/*.py ./extract_lambda/; mkdir ./extract_lambda/clients && cp -r ./src/clients/*.py ./extract_lambda/clients/
-	cd extract_lambda; zip -r ../extract_lambda.zip *; cd ..
-	rm -rf ./extract_lambda
+deploy-extract: pre-commit
+	aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACC_NO}.dkr.ecr.${AWS_REGION}.amazonaws.com
+	docker build -t reddit-extract -f Dockerfile.extract .
+	docker tag reddit-extract:latest ${AWS_ACC_NO}.dkr.ecr.${AWS_REGION}.amazonaws.com/reddit-extract:latest
+	docker push ${AWS_ACC_NO}.dkr.ecr.${AWS_REGION}.amazonaws.com/reddit-extract:latest
+	cd terraform && terraform apply -auto-approve
 
-deploy: test create-extract-lambda
+deploy-transform: pre-commit
+	aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACC_NO}.dkr.ecr.${AWS_REGION}.amazonaws.com
+	docker build -t reddit-transform -f Dockerfile.transform .
+	docker tag reddit-transform:latest ${AWS_ACC_NO}.dkr.ecr.${AWS_REGION}.amazonaws.com/reddit-transform:latest
+	docker push ${AWS_ACC_NO}.dkr.ecr.${AWS_REGION}.amazonaws.com/reddit-transform:latest
 	cd terraform && terraform apply -auto-approve
