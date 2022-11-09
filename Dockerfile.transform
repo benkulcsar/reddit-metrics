@@ -4,6 +4,6 @@ COPY pyproject.toml  .
 RUN  pip3 install .[transform] --target "${LAMBDA_TASK_ROOT}"
 
 COPY ./src/transform.py ${LAMBDA_TASK_ROOT}/
-COPY ./src/common/*.py ${LAMBDA_TASK_ROOT}/clients/
+COPY ./src/common/*.py ${LAMBDA_TASK_ROOT}/common/
 
 CMD [ "transform.lambda_handler" ]
