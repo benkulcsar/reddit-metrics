@@ -1,0 +1,9 @@
+FROM public.ecr.aws/lambda/python:3.9
+
+COPY pyproject.toml  .
+RUN  pip3 install .[transform] --target "${LAMBDA_TASK_ROOT}"
+
+COPY ./src/transform.py ${LAMBDA_TASK_ROOT}/
+COPY ./src/common/*.py ${LAMBDA_TASK_ROOT}/clients/
+
+CMD [ "transform.lambda_handler" ]

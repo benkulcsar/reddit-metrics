@@ -3,9 +3,10 @@ from __future__ import annotations
 from datetime import datetime
 
 import pytest
-from utils import estimate_downvotes
-from utils import get_date_parts_from_datetime
-from utils import get_s3_object_name_and_partition_prefix
+from common.utils import estimate_downvotes
+from common.utils import get_date_parts_from_datetime
+from common.utils import get_previous_s3_key
+from common.utils import get_s3_object_key
 
 
 @pytest.mark.parametrize(
@@ -40,12 +41,25 @@ def test_get_date_parts_from_datetime(datetime_input, expected_output):
 
 
 @pytest.mark.parametrize(
-    "ts_input,expected_output",
+    "dt,prefix,expected_output",
     [
-        (datetime(2022, 10, 1, 5), ("hour=05.csv", "year=2022/month=10/day=01")),
-        (datetime(2023, 1, 1, 23), ("hour=23.csv", "year=2023/month=01/day=01")),
-        (datetime(2022, 11, 1, 12, 55, 44), ("hour=12.csv", "year=2022/month=11/day=01")),
+        (datetime(2022, 10, 1, 5), "random/prefix", "random/prefix/year=2022/month=10/day=01/hour=05.csv"),
+        (datetime(2023, 1, 1, 23), "", "year=2023/month=01/day=01/hour=23.csv"),
+        (datetime(2022, 11, 1, 12, 55, 44), "a/b/c/d", "a/b/c/d/year=2022/month=11/day=01/hour=12.csv"),
     ],
 )
-def test_get_s3_object_name_and_partition_prefix(ts_input, expected_output):
-    assert get_s3_object_name_and_partition_prefix(ts_input) == expected_output
+def test_get_s3_object_key(dt, prefix, expected_output):
+    assert get_s3_object_key(dt=dt, prefix=prefix) == expected_output
+
+
+@pytest.mark.parametrize(
+    "key,expected_previous_key",
+    [
+        ("random/prefix/year=2022/month=10/day=01/hour=05.csv", "random/prefix/year=2022/month=10/day=01/hour=04.csv"),
+        ("year=2022/month=10/day=01/hour=05.csv", "year=2022/month=10/day=01/hour=04.csv"),
+        ("a/b/c/year=2022/month=10/day=01/hour=00.csv", "a/b/c/year=2022/month=09/day=30/hour=23.csv"),
+        ("a/b/c/year=2022/month=01/day=01/hour=00.csv", "a/b/c/year=2021/month=12/day=31/hour=23.csv"),
+    ],
+)
+def test_get_previous_s3_key(key, expected_previous_key):
+    assert get_previous_s3_key(key) == expected_previous_key

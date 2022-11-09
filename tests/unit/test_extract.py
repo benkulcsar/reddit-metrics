@@ -2,42 +2,43 @@ from __future__ import annotations
 
 from datetime import datetime
 
-import config as config
-from clients.reddit_client import FakeRedditClient
-from clients.s3_client import FakeS3Client
+import common.config as config
+from common.reddit_client import FakeRedditClient
+from common.s3_client import FakeS3Client
+from common.utils import get_s3_object_key
 from extract import convert_submission_to_reddit_post
 from extract import fetch_new_submissions_from_reddit
-from extract import S3_DATA_PREFIX
+from extract import S3_EXTRACT_PREFIX
 from extract import upload_reddit_posts_to_s3
-from utils import get_s3_object_name_and_partition_prefix
 
 
-def test_fetch_new_posts_from_reddit(reddit_submission):
-    fake_reddit_client = FakeRedditClient([reddit_submission])
-    fetch_one = fetch_new_submissions_from_reddit(reddit_client=fake_reddit_client, subreddit_list=["r/def"])
+def test_fetch_new_posts_from_reddit(reddit_submissions):
+    fake_reddit_client = FakeRedditClient(reddit_submissions)
+    fetch_subs = fetch_new_submissions_from_reddit(reddit_client=fake_reddit_client, subreddit_list=["r/abc", "r/def"])
     fetch_none = fetch_new_submissions_from_reddit(reddit_client=fake_reddit_client, subreddit_list=["r/xyz"])
-    assert fetch_one == [reddit_submission]
+    assert fetch_subs == reddit_submissions
     assert fetch_none == []
 
 
-def test_convert_submission_to_reddit_post(reddit_submission, reddit_post):
-    converted_reddit_post = convert_submission_to_reddit_post(reddit_submission)
-    assert converted_reddit_post == reddit_post
+def test_convert_submission_to_reddit_post(reddit_submissions, reddit_posts):
+    for reddit_submission, reddit_post in zip(reddit_submissions, reddit_posts):
+        converted_reddit_post = convert_submission_to_reddit_post(reddit_submission)
+        assert converted_reddit_post == reddit_post
 
 
-def test_upload_reddit_posts_to_s3(reddit_post):
+def test_upload_reddit_posts_to_s3(reddit_posts):
     exec_datetime = datetime(2022, 11, 1, 14, 15)
 
     fake_s3_client = FakeS3Client()
     upload_reddit_posts_to_s3(
         s3_client=fake_s3_client,
-        reddit_post_list=[reddit_post],
+        reddit_post_list=reddit_posts,
         exec_datetime=exec_datetime,
     )
     assert len(fake_s3_client.uploaded) == 1
 
     bucket_name = config.get_s3_bucket_name()
-    name, prefix = get_s3_object_name_and_partition_prefix(dt=exec_datetime)
-    expected_key = f"{bucket_name}/{S3_DATA_PREFIX}/{prefix}/{name}"
+    object_key = get_s3_object_key(dt=exec_datetime, prefix=S3_EXTRACT_PREFIX)
+    expected_key = f"{bucket_name}/{object_key}"
 
-    assert fake_s3_client.uploaded.get(expected_key) == [reddit_post]
+    assert fake_s3_client.uploaded.get(expected_key) == reddit_posts

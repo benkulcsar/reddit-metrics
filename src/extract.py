@@ -3,23 +3,23 @@ from __future__ import annotations
 import logging
 from datetime import datetime
 
-import config as config
-from clients.reddit_client import AbstractRedditClient
-from clients.reddit_client import RedditClient
-from clients.s3_client import AbstractS3Client
-from clients.s3_client import S3Client
-from models import RedditPost
-from utils import estimate_downvotes
-from utils import get_s3_object_name_and_partition_prefix
-from utils import is_aws_env
+import common.config as config
+from common.models import RedditPost
+from common.reddit_client import AbstractRedditClient
+from common.reddit_client import RedditClient
+from common.s3_client import AbstractS3Client
+from common.s3_client import S3Client
+from common.utils import estimate_downvotes
+from common.utils import get_s3_object_key
+from common.utils import is_aws_env
 
 
 POST_FETCH_COUNT = 100
 
 if is_aws_env():
-    S3_DATA_PREFIX = "reddit-posts"
+    S3_EXTRACT_PREFIX = "reddit-posts"
 else:
-    S3_DATA_PREFIX = "reddit-posts-local-run"
+    S3_EXTRACT_PREFIX = "reddit-posts-local-run"
 
 
 if logging.getLogger().hasHandlers():
@@ -27,28 +27,6 @@ if logging.getLogger().hasHandlers():
 else:
     logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-
-def convert_submission_to_reddit_post(submission: dict) -> RedditPost:
-    """
-    Converts a dictionary representing a PRAW submission object to a RedditPost object
-    """
-
-    # Reddit API doesn't send the number of downvotes, so it is estimated.
-    downvotes_estimated = estimate_downvotes(upvotes=submission["ups"], upvote_ratio=submission["upvote_ratio"])
-
-    reddit_post = RedditPost(
-        post_id=submission["id"],
-        subreddit_name=submission.get("subreddit_display_name", ""),
-        upvote_ratio=submission.get("upvote_ratio", 0.0),
-        upvotes=submission.get("ups", 0),
-        downvotes_original=submission.get("downs", 0),
-        downvotes_estimated=downvotes_estimated,
-        awards=submission.get("total_awards_received", 0),
-        created_utc=submission.get("created_utc", 0.0),
-        extracted_utc=submission.get("extracted_utc", 0.0),
-    )
-    return reddit_post
 
 
 def fetch_new_submissions_from_reddit(
@@ -73,6 +51,33 @@ def fetch_new_submissions_from_reddit(
     return submission_list
 
 
+def convert_submission_to_reddit_post(submission: dict) -> RedditPost:
+    """
+    Converts a dictionary representing a PRAW submission object to a RedditPost object
+    """
+
+    # Reddit API doesn't send the number of downvotes, so it is estimated.
+    downvotes_estimated = estimate_downvotes(upvotes=submission["ups"], upvote_ratio=submission["upvote_ratio"])
+    post_dt = datetime.utcfromtimestamp(submission.get("extracted_utc", 0.0))
+
+    reddit_post = RedditPost(
+        post_id=submission["id"],
+        subreddit_name=submission.get("subreddit_display_name", ""),
+        upvote_ratio=submission.get("upvote_ratio", 0.0),
+        upvotes=submission.get("ups", 0),
+        downvotes_original=submission.get("downs", 0),
+        downvotes_estimated=downvotes_estimated,
+        awards=submission.get("total_awards_received", 0),
+        created_utc=submission.get("created_utc", 0.0),
+        extracted_utc=submission.get("extracted_utc", 0.0),
+        year=str(post_dt.year),
+        month=str(post_dt.month).zfill(2),
+        day=str(post_dt.day).zfill(2),
+        hour=str(post_dt.hour).zfill(2),
+    )
+    return reddit_post
+
+
 def upload_reddit_posts_to_s3(
     s3_client: AbstractS3Client,
     reddit_post_list: list[RedditPost],
@@ -81,13 +86,11 @@ def upload_reddit_posts_to_s3(
     """
     Builds the S3 prefix and object name and uploads a list of reddit posts to S3 using the s3_client.
     """
-    s3_object_name, partition_prefix = get_s3_object_name_and_partition_prefix(dt=exec_datetime)
-    s3_full_prefix = S3_DATA_PREFIX + "/" + partition_prefix
+    s3_object_key = get_s3_object_key(prefix=S3_EXTRACT_PREFIX, dt=exec_datetime)
     s3_client.upload_dataclass_object_list_to_s3(
         dataclass_object_list=reddit_post_list,
         s3_bucket_name=config.get_s3_bucket_name(),
-        s3_prefix=s3_full_prefix,
-        s3_object_name=s3_object_name,
+        s3_object_key=s3_object_key,
     )
 
 
@@ -123,7 +126,7 @@ def extract() -> None:
     logger.info("Extract task done")
 
 
-def lambda_handler(context, event):
+def lambda_handler(event, context):
     extract()
 
 
