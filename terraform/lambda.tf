@@ -37,3 +37,20 @@ resource "aws_lambda_function" "reddit_transform_lambda" {
     }
   }
 }
+
+resource "aws_lambda_function" "reddit_load_lambda" {
+  package_type  = "Image"
+  image_uri     = "${aws_ecr_repository.reddit_load.repository_url}@${data.aws_ecr_image.reddit_load_image.image_digest}"
+  function_name = "reddit-load"
+  role          = aws_iam_role.reddit_lambda_role.arn
+  timeout       = "300"
+  memory_size   = 256
+
+  environment {
+    variables = {
+      TF_VAR_REDDIT_S3_BUCKET      = var.REDDIT_S3_BUCKET
+      TF_VAR_GCP_ACCESS_KEY        = var.GCP_ACCESS_KEY
+      TF_VAR_GCP_SECRET_ACCESS_KEY = var.GCP_SECRET_ACCESS_KEY
+    }
+  }
+}

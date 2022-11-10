@@ -4,14 +4,14 @@
 
 ### Objective
 
-A simple dashboard to compare aggregated metrics of data and programming related subreddits over time: upvotes, downvotes, upvote ratio, awards, new posts, etc.
+Create an ETL pipeline for a simple dashboard showing aggregated metrics of selected subreddits over time.
 
 ### Roadmap
 
 * [x] AWS infra
 * [x] Extract (lambda)
 * [X] Transform (lambda)
-* [ ] Load (lambda)
+* [X] Load (lambda)
 * [ ] Dashboard (looker studio)
 * [ ] Improvements from the backlog
 
@@ -30,6 +30,7 @@ The project requires the following environment variables to be set:
 - `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (except if running in AWS)
 - `AWS_ACC_NO` and `AWS_REGION` (for ECR)
 - `TF_VAR_REDDIT_CLIENT_ID`, `TF_VAR_REDDIT_CLIENT_SECRET` and `TF_VAR_REDDIT_S3_BUCKET`
+- `GCP_ACCESS_KEY` and `GCP_SECRET_ACCESS_KEY` (to access Google Cloud)
 
 ### Run Locally (for testing and development)
 
@@ -55,10 +56,11 @@ Run the extract task:
 make extract
 ```
 
-Run the transform task:
+Run the transform and load tasks:
 
 ```bash
 python src/transform.py -b [BUCKET] -k [KEY]
+python src/load.py -b [BUCKET] -k [KEY]
 ```
 
 ### Deployment
@@ -68,4 +70,5 @@ Deploying in AWS requires terraform set up to use an S3 backend:
 ```bash
 make deploy-extract
 make deploy-transform
+make deploy-load
 ```
