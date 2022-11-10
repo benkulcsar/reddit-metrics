@@ -37,6 +37,19 @@ class AbstractS3Client(ABC):
         """
         pass
 
+    @abstractmethod
+    def transfer_object_from_s3_to_gcs(
+        self,
+        s3_bucket_name: str,
+        s3_object_key: str,
+        gcs_bucket_name: str,
+        gcs_object_key: str,
+        gcp_access_key: str,
+        gcp_secret_access_key: str,
+    ) -> None:
+        """Transfer an object from an S3 bucket to Google Cloud Storage bucket"""
+        pass
+
 
 class S3Client(AbstractS3Client):
     def __init__(self):
@@ -71,10 +84,35 @@ class S3Client(AbstractS3Client):
 
         return dataclass_list
 
+    def transfer_object_from_s3_to_gcs(
+        self,
+        s3_bucket_name: str,
+        s3_object_key: str,
+        gcs_bucket_name: str,
+        gcs_object_key: str,
+        gcp_access_key: str,
+        gcp_secret_access_key: str,
+    ) -> None:
+        gcs_client = boto3.client(
+            "s3",
+            region_name="auto",
+            endpoint_url="https://storage.googleapis.com",
+            aws_access_key_id=gcp_access_key,
+            aws_secret_access_key=gcp_secret_access_key,
+        )
+
+        object_to_transfer = self.s3_client.get_object(Bucket=s3_bucket_name, Key=s3_object_key)
+        gcs_client.upload_fileobj(
+            object_to_transfer["Body"],
+            gcs_bucket_name,
+            gcs_object_key,
+        )
+
 
 class FakeS3Client(ABC):
     def __init__(self):
         self.uploaded = {}  # type: dict[str, list[BaseDataclass]]
+        self.transferred_to_gcs = {}  # type: dict[str, list[BaseDataclass]]
 
     def upload_dataclass_object_list_to_s3(
         self,
@@ -91,3 +129,17 @@ class FakeS3Client(ABC):
         s3_object_key: str,
     ) -> list[BaseDataclass]:
         return self.uploaded[f"{s3_bucket_name}/{s3_object_key}"]
+
+    def transfer_object_from_s3_to_gcs(
+        self,
+        s3_bucket_name: str,
+        s3_object_key: str,
+        gcs_bucket_name: str,
+        gcs_object_key: str,
+        gcp_access_key: str,
+        gcp_secret_access_key: str,
+    ) -> None:
+        """Transfer an object from an S3 bucket to Google Cloud Storage bucket"""
+        self.transferred_to_gcs[f"{gcs_bucket_name}/{gcs_object_key}"] = self.uploaded[
+            f"{s3_bucket_name}/{s3_object_key}"
+        ]
