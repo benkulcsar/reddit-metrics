@@ -14,12 +14,8 @@ from common.utils import get_s3_object_key
 from common.utils import is_aws_env
 
 
-POST_FETCH_COUNT = 100
-
-if is_aws_env():
-    S3_EXTRACT_PREFIX = "reddit-posts"
-else:
-    S3_EXTRACT_PREFIX = "reddit-posts-local-run"
+POST_FETCH_COUNT = config.get_post_fetch_count()
+S3_EXTRACT_PREFIX = config.get_extract_prefix()
 
 
 if logging.getLogger().hasHandlers():
@@ -70,10 +66,10 @@ def convert_submission_to_reddit_post(submission: dict) -> RedditPost:
         awards=submission.get("total_awards_received", 0),
         created_utc=submission.get("created_utc", 0.0),
         extracted_utc=submission.get("extracted_utc", 0.0),
-        year=str(post_dt.year),
-        month=str(post_dt.month).zfill(2),
-        day=str(post_dt.day).zfill(2),
-        hour=str(post_dt.hour).zfill(2),
+        partition_year=str(post_dt.year),
+        partition_month=str(post_dt.month).zfill(2),
+        partition_day=str(post_dt.day).zfill(2),
+        partition_hour=str(post_dt.hour).zfill(2),
     )
     return reddit_post
 

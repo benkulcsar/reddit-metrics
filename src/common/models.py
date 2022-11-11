@@ -1,3 +1,6 @@
+"""
+The dataclasses are defined to document the schemas in a way that can be understood by both humans and machines.
+"""
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -5,10 +8,10 @@ from dataclasses import dataclass
 
 @dataclass
 class BaseDataclass:
-    year: str
-    month: str
-    day: str
-    hour: str
+    partition_year: str
+    partition_month: str
+    partition_day: str
+    partition_hour: str
 
 
 @dataclass

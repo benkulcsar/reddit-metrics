@@ -21,3 +21,8 @@ variable "GCP_SECRET_ACCESS_KEY" {
   type      = string
   sensitive = true
 }
+
+variable "MY_EMAIL" {
+  type      = string
+  sensitive = true
+}

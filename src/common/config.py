@@ -31,6 +31,18 @@ def get_gcs_bucket_name():
     return os.environ["TF_VAR_REDDIT_S3_BUCKET"]
 
 
+def get_extract_prefix():
+    return "reddit-posts"
+
+
+def get_transform_prefix():
+    return "reddit-metrics"
+
+
+def get_post_fetch_count():
+    return 100
+
+
 def get_subreddit_list():
     return sorted(
         [

@@ -54,3 +54,19 @@ resource "aws_lambda_function" "reddit_load_lambda" {
     }
   }
 }
+
+resource "aws_lambda_function" "reddit_monitoring_sns" {
+  filename         = "./sns_lambda/sns_lambda.zip"
+  function_name    = "reddit-monitoring-sns"
+  role             = aws_iam_role.reddit_lambda_monitoring_sns_role.arn
+  handler          = "sns_lambda.lambda_handler"
+  runtime          = "python3.7"
+  timeout          = "60"
+  source_code_hash = filebase64sha256("./sns_lambda/sns_lambda.zip")
+
+  environment {
+    variables = {
+      snsARN = aws_sns_topic.reddit_lambda_errors.arn
+    }
+  }
+}
