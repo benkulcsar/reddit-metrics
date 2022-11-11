@@ -55,10 +55,10 @@ def reddit_posts():
             awards=0,
             created_utc=1.0,
             extracted_utc=1667920961.127697,
-            year="2022",
-            month="11",
-            day="08",
-            hour="15",
+            partition_year="2022",
+            partition_month="11",
+            partition_day="08",
+            partition_hour="15",
         ),
         RedditPost(
             post_id="y",
@@ -70,10 +70,10 @@ def reddit_posts():
             awards=0,
             created_utc=1.0,
             extracted_utc=1667920961.127697,
-            year="2022",
-            month="11",
-            day="08",
-            hour="15",
+            partition_year="2022",
+            partition_month="11",
+            partition_day="08",
+            partition_hour="15",
         ),
         RedditPost(
             post_id="z",
@@ -85,10 +85,10 @@ def reddit_posts():
             awards=0,
             created_utc=1.0,
             extracted_utc=1667920961.127697,
-            year="2022",
-            month="11",
-            day="08",
-            hour="15",
+            partition_year="2022",
+            partition_month="11",
+            partition_day="08",
+            partition_hour="15",
         ),
     ]
 
@@ -120,10 +120,10 @@ def metric_set_list():
             downvotes=5,
             upvote_ratio=0.8,
             transformed_utc=1.0,
-            year="2022",
-            month="11",
-            day="08",
-            hour="15",
+            partition_year="2022",
+            partition_month="11",
+            partition_day="08",
+            partition_hour="15",
         ),
         RedditMetricSet(
             subreddit_name="r/def",
@@ -131,10 +131,10 @@ def metric_set_list():
             downvotes=1,
             upvote_ratio=0.5,
             transformed_utc=1.0,
-            year="2022",
-            month="11",
-            day="08",
-            hour="15",
+            partition_year="2022",
+            partition_month="11",
+            partition_day="08",
+            partition_hour="15",
         ),
     ]
 
@@ -151,7 +151,16 @@ def previous_reddit_posts_df(previous_reddit_posts):
 
 @pytest.fixture
 def metric_sets_df(metric_set_list):
-    columns = ["subreddit_name", "year", "month", "day", "hour", "up_delta", "down_delta", "upvote_ratio"]
+    columns = [
+        "subreddit_name",
+        "partition_year",
+        "partition_month",
+        "partition_day",
+        "partition_hour",
+        "up_delta",
+        "down_delta",
+        "upvote_ratio",
+    ]
     data = [
         ["r/abc", "2022", "11", "08", "15", 20, 5, 0.8],
         ["r/def", "2022", "11", "08", "15", 1, 1, 0.5],

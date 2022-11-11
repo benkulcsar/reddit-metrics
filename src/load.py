@@ -18,7 +18,7 @@ def load(s3_bucket, s3_key) -> None:
     logger.info("Starting load task")
 
     gcs_bucket = config.get_gcs_bucket_name()
-    gcs_key = s3_key.replace("/", "_").replace("_", "/", 1)
+    gcs_key = s3_key
 
     s3_client = S3Client()
 
@@ -41,10 +41,13 @@ def lambda_handler(event, context):
     if event.get("Records"):
         bucket = event["Records"][0]["s3"]["bucket"]["name"]
         key = urllib.parse.unquote_plus(event["Records"][0]["s3"]["object"]["key"], encoding="utf-8")
-    elif event.get("Extracts"):
-        bucket = event["Extracts"][0]["bucket"]
-        key = event["Extracts"][0]["key"]
-    load(s3_bucket=bucket, s3_key=key)
+        load(s3_bucket=bucket, s3_key=key)
+
+    # This enables running multiple load tasks by triggering the lambda manually with a custom test event:
+    # {"Backfill":["bucket":"bucket_name","key":"obj_key1","bucket":"bucket_name","key":"obj_key2"]}
+    elif event.get("Backfill"):
+        for backfill in event["Backfill"]:
+            load(s3_bucket=backfill.get("bucket"), s3_key=backfill.get("key"))
 
 
 if __name__ == "__main__" and not is_aws_env():

@@ -4,6 +4,7 @@ import logging
 import urllib
 from datetime import datetime
 
+import common.config as config
 import pandas as pd
 from common.models import RedditMetricSet
 from common.models import RedditPost
@@ -13,12 +14,8 @@ from common.utils import get_previous_s3_key
 from common.utils import is_aws_env
 
 
-if is_aws_env():
-    S3_EXTRACT_PREFIX = "reddit-posts"
-    S3_TRANSFORM_PREFIX = "reddit-metrics"
-else:
-    S3_EXTRACT_PREFIX = "reddit-posts"
-    S3_TRANSFORM_PREFIX = "reddit-metrics-local-run"
+S3_EXTRACT_PREFIX = config.get_extract_prefix()
+S3_TRANSFORM_PREFIX = config.get_transform_prefix()
 
 
 if logging.getLogger().hasHandlers():
@@ -52,10 +49,10 @@ def calculate_metric_sets(current_df: pd.DataFrame, previous_df: pd.DataFrame) -
         "subreddit_name",
         "upvotes",
         "downvotes_estimated",
-        "year",
-        "month",
-        "day",
-        "hour",
+        "partition_year",
+        "partition_month",
+        "partition_day",
+        "partition_hour",
     ]
     cols_to_keep_previous = ["post_id", "upvotes", "downvotes_estimated"]
 
@@ -72,7 +69,15 @@ def calculate_metric_sets(current_df: pd.DataFrame, previous_df: pd.DataFrame) -
     joined_df["up_delta"] = joined_df["up_delta"].apply(lambda x: max(x, 0))
     joined_df["down_delta"] = joined_df["down_delta"].apply(lambda x: max(x, 0))
 
-    grouped_df = joined_df.groupby(["subreddit_name", "year", "month", "day", "hour"])[["up_delta", "down_delta"]].agg(
+    grouped_df = joined_df.groupby(
+        [
+            "subreddit_name",
+            "partition_year",
+            "partition_month",
+            "partition_day",
+            "partition_hour",
+        ],
+    )[["up_delta", "down_delta"]].agg(
         "sum",
     )
     grouped_df["upvote_ratio"] = grouped_df.up_delta / (grouped_df.up_delta + grouped_df.down_delta)
@@ -91,10 +96,10 @@ def convert_df_to_metric_set_list(df: pd.DataFrame, transformed_timestamp: float
             upvotes=int(row.up_delta),
             downvotes=int(row.down_delta),
             upvote_ratio=round(row.upvote_ratio, 4),
-            year=row.year,
-            month=row.month,
-            day=row.day,
-            hour=row.hour,
+            partition_year=row.partition_year,
+            partition_month=row.partition_month,
+            partition_day=row.partition_day,
+            partition_hour=row.partition_hour,
             transformed_utc=transformed_timestamp,
         )
         metric_set_list.append(reddit_metric_set)
@@ -159,10 +164,13 @@ def lambda_handler(event, context):
     if event.get("Records"):
         bucket = event["Records"][0]["s3"]["bucket"]["name"]
         key = urllib.parse.unquote_plus(event["Records"][0]["s3"]["object"]["key"], encoding="utf-8")
-    elif event.get("Extracts"):
-        bucket = event["Extracts"][0]["bucket"]
-        key = event["Extracts"][0]["key"]
-    transform(bucket, key)
+        transform(bucket, key)
+
+    # This enables running multiple load tasks by triggering the lambda manually with a custom test event:
+    # {"Backfill":["bucket":"bucket_name","key":"obj_key1","bucket":"bucket_name","key":"obj_key2"]}
+    elif event.get("Backfill"):
+        for backfill in event["Backfill"]:
+            transform(s3_bucket=backfill.get("bucket"), s3_key=backfill.get("key"))
 
 
 if __name__ == "__main__" and not is_aws_env():
