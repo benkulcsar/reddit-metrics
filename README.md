@@ -1,4 +1,4 @@
-# Reddit Statistics Dashboard
+# Reddit Metrics
 
 ## About the Project
 
