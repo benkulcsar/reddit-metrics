@@ -4,7 +4,11 @@
 
 ### Objective
 
-Create an ETL pipeline for a simple dashboard showing aggregated metrics of selected subreddits over time.
+Create an ETL pipeline for a simple dashboard showing upvote ratios of selected subreddits over time:
+
+**[Link to the dashboard](https://datastudio.google.com/reporting/1969ea1a-3a19-4061-aa8a-43df7739af68 "Looker Studio")**
+
+!["Dashboard"](images/dash.png?v=4&s=200 "Dashboard")
 
 ### Roadmap
 
@@ -12,7 +16,7 @@ Create an ETL pipeline for a simple dashboard showing aggregated metrics of sele
 * [x] Extract (lambda)
 * [X] Transform (lambda)
 * [X] Load (lambda)
-* [ ] Dashboard (looker studio)
+* [X] Dashboard (looker studio)
 * [X] Improvements from the "must have" backlog
 * [ ] Improvements from the "nice to have" backlog (see below)
 
@@ -25,7 +29,8 @@ Create an ETL pipeline for a simple dashboard showing aggregated metrics of sele
 
 ### High Level Architecture
 
-!["Architecture"](architecture.png?v=4&s=200 "Architecture")
+!["Architecture"](images/architecture.png?v=4&s=200 "Architecture")
+
 Lambda functions are deployed using docker images.
 
 SNS is used for email alerting. A separate lambda function is subscribed to CloudWatch logs and forwards the ones containing errors to SNS.
@@ -68,7 +73,7 @@ python src/transform.py -b [BUCKET] -k [KEY]
 python src/load.py -b [BUCKET] -k [KEY]
 ```
 
-### Deployment
+### Deploy
 
 Deploying in AWS requires terraform set up to use an S3 backend.
 
@@ -102,7 +107,11 @@ python src/transform.py -b bucket_name -k obj_key2
 
 ## Backlog (nice to haves)
 
-* [ ] Create ECR repos with Terraform before deploying (see note in Deployment section)
+* [ ] Add `num_comments` to the RedditPost model
+* [ ] Add new metrics (e.g. number of posts)
+* [ ] Dashboard improvements (e.g. moving average)
+* [ ] Review list of subreddits
 * [ ] Make Terraform code DRY
 * [ ] Catch and handle exceptions that don't have to stop the lambdas
+* [ ] Create ECR repos with Terraform before deploying (see note in Deployment section)
 * [ ] Test the actual ETL methods in integration tests
