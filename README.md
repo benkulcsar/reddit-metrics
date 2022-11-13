@@ -107,7 +107,7 @@ python src/transform.py -b bucket_name -k obj_key2
 
 ## Backlog (nice to haves)
 
-* [ ] Add `num_comments` to the RedditPost model
+* [X] Add `num_comments` to the RedditPost model
 * [ ] Add new metrics (e.g. number of posts)
 * [ ] Dashboard improvements (e.g. moving average)
 * [ ] Review list of subreddits

@@ -64,6 +64,7 @@ def convert_submission_to_reddit_post(submission: dict) -> RedditPost:
         downvotes_original=submission.get("downs", 0),
         downvotes_estimated=downvotes_estimated,
         awards=submission.get("total_awards_received", 0),
+        comment_count=submission.get("num_comments", 0.0),
         created_utc=submission.get("created_utc", 0.0),
         extracted_utc=submission.get("extracted_utc", 0.0),
         partition_year=str(post_dt.year),

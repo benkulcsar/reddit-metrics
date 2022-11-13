@@ -25,6 +25,7 @@ class RedditPost(BaseDataclass):
     awards: int
     created_utc: float
     extracted_utc: float
+    comment_count: int = 0
 
 
 @dataclass

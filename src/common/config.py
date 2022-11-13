@@ -91,5 +91,6 @@ def get_subreddit_list():
             "childfree",
             "ethereum",
             "python",
+            "dataisbeautiful",
         ],
     )

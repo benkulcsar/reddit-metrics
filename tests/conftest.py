@@ -38,6 +38,7 @@ def reddit_submissions():
             "total_awards_received": 0,
             "created_utc": 1.0,
             "extracted_utc": 1667920961.127697,
+            "num_comments": 1,
         },
     ]
 
@@ -59,6 +60,7 @@ def reddit_posts():
             partition_month="11",
             partition_day="08",
             partition_hour="15",
+            comment_count=0,
         ),
         RedditPost(
             post_id="y",
@@ -74,6 +76,7 @@ def reddit_posts():
             partition_month="11",
             partition_day="08",
             partition_hour="15",
+            comment_count=0,
         ),
         RedditPost(
             post_id="z",
@@ -89,6 +92,7 @@ def reddit_posts():
             partition_month="11",
             partition_day="08",
             partition_hour="15",
+            comment_count=1,
         ),
     ]
 
