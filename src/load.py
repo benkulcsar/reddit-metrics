@@ -13,12 +13,18 @@ else:
     logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+S3_TRANSFORM_PREFIX = config.get_transform_prefix()
+def build_dt_partitioned_key(key):
+    return (key.replace(S3_TRANSFORM_PREFIX, S3_TRANSFORM_PREFIX + "-date-partitioned")
+               .replace("year=", "dt=")
+               .replace("/month=", "-")
+               .replace("/day=", "-"))
 
 def load(s3_bucket, s3_key) -> None:
     logger.info("Starting load task")
 
     gcs_bucket = config.get_gcs_bucket_name()
-    gcs_key = s3_key
+    gcs_key = build_dt_partitioned_key(s3_key)
 
     s3_client = S3Client()
 

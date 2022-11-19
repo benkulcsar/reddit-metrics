@@ -1,6 +1,9 @@
 pre-commit:
 	pre-commit run --all-files
 
+pytest:
+	pytest
+
 terraform-init:
 	cd terraform; terraform init -backend-config=backend.tfvars -migrate-state
 	cd terraform/sns_lambda; zip sns_lambda.zip sns_lambda.py

@@ -48,6 +48,7 @@ class RedditClient(AbstractRedditClient):
                 "ups": submission.ups,
                 "downs": submission.downs,
                 "total_awards_received": submission.total_awards_received,
+                "num_comments": submission.num_comments,
                 "created_utc": submission.created_utc,
                 "extracted_utc": datetime.utcnow().timestamp(),
             }
