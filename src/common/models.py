@@ -34,4 +34,6 @@ class RedditMetricSet(BaseDataclass):
     upvotes: int
     downvotes: int
     upvote_ratio: float
+    posts: int
+    comments: int
     transformed_utc: float
