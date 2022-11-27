@@ -4,7 +4,7 @@
 
 ### Objective
 
-Create an ETL pipeline for a simple dashboard showing upvote ratios of selected subreddits over time:
+Create an ETL pipeline for a simple dashboard showing metrics of selected subreddits over time:
 
 **[Link to the dashboard](https://datastudio.google.com/reporting/865759fa-0b1a-4bee-8b67-89cb2ed0d2f0 "Looker Studio")**
 
@@ -108,10 +108,11 @@ python src/transform.py -b bucket_name -k obj_key2
 ## Backlog (nice to haves)
 
 * [X] Add `num_comments` to the RedditPost model
-* [ ] Add new metrics (e.g. number of posts)
+* [X] Add new metrics (e.g. number of posts)
 * [X] Dashboard improvements (e.g. moving average)
-* [ ] Review list of subreddits
+* [X] Review list of subreddits
 * [ ] Make Terraform code DRY
 * [ ] Catch and handle exceptions that don't have to stop the lambdas
 * [ ] Create ECR repos with Terraform before deploying (see note in Deployment section)
 * [ ] Test the actual ETL methods in integration tests
+* [ ] Transformation without pandas

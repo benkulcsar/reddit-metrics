@@ -49,12 +49,13 @@ def calculate_metric_sets(current_df: pd.DataFrame, previous_df: pd.DataFrame) -
         "subreddit_name",
         "upvotes",
         "downvotes_estimated",
+        "comment_count",
         "partition_year",
         "partition_month",
         "partition_day",
         "partition_hour",
     ]
-    cols_to_keep_previous = ["post_id", "upvotes", "downvotes_estimated"]
+    cols_to_keep_previous = ["post_id", "upvotes", "downvotes_estimated", "comment_count"]
 
     joined_df = current_df[cols_to_keep_current].merge(
         previous_df[cols_to_keep_previous],
@@ -62,12 +63,17 @@ def calculate_metric_sets(current_df: pd.DataFrame, previous_df: pd.DataFrame) -
         how="left",
         suffixes=("_new", "_old"),
     )
+
+    joined_df["post_delta"] = joined_df["upvotes_old"].isnull().apply(int)
+
     joined_df = joined_df.fillna(0)
 
     joined_df["up_delta"] = joined_df.upvotes_new - joined_df.upvotes_old
     joined_df["down_delta"] = joined_df.downvotes_estimated_new - joined_df.downvotes_estimated_old
-    joined_df["up_delta"] = joined_df["up_delta"].apply(lambda x: max(x, 0))
-    joined_df["down_delta"] = joined_df["down_delta"].apply(lambda x: max(x, 0))
+    joined_df["comment_delta"] = joined_df.comment_count_new - joined_df.comment_count_old
+    joined_df["up_delta"] = joined_df["up_delta"].apply(lambda x: int(max(x, 0)))
+    joined_df["down_delta"] = joined_df["down_delta"].apply(lambda x: int(max(x, 0)))
+    joined_df["comment_delta"] = joined_df["comment_delta"].apply(lambda x: int(max(x, 0)))
 
     grouped_df = joined_df.groupby(
         [
@@ -77,7 +83,7 @@ def calculate_metric_sets(current_df: pd.DataFrame, previous_df: pd.DataFrame) -
             "partition_day",
             "partition_hour",
         ],
-    )[["up_delta", "down_delta"]].agg(
+    )[["up_delta", "down_delta", "comment_delta", "post_delta"]].agg(
         "sum",
     )
     grouped_df["upvote_ratio"] = grouped_df.up_delta / (grouped_df.up_delta + grouped_df.down_delta)
@@ -96,6 +102,8 @@ def convert_df_to_metric_set_list(df: pd.DataFrame, transformed_timestamp: float
             upvotes=int(row.up_delta),
             downvotes=int(row.down_delta),
             upvote_ratio=round(row.upvote_ratio, 4),
+            posts=int(row.post_delta),
+            comments=int(row.comment_delta),
             partition_year=row.partition_year,
             partition_month=row.partition_month,
             partition_day=row.partition_day,

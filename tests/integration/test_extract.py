@@ -35,5 +35,6 @@ def test_extract(reddit_submissions, reddit_posts):
     bucket_name = config.get_s3_bucket_name()
     object_key = get_s3_object_key(dt=exec_datetime, prefix=S3_EXTRACT_PREFIX)
     expected_key = f"{bucket_name}/{object_key}"
+    uploaded_reddit_posts = fake_s3_client.uploaded.get(expected_key)
 
-    assert fake_s3_client.uploaded.get(expected_key) == reddit_posts
+    assert sorted(uploaded_reddit_posts, key=lambda d: d.post_id) == sorted(reddit_posts, key=lambda d: d.post_id)

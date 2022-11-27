@@ -14,11 +14,16 @@ else:
 logger = logging.getLogger(__name__)
 
 S3_TRANSFORM_PREFIX = config.get_transform_prefix()
+
+
 def build_dt_partitioned_key(key):
-    return (key.replace(S3_TRANSFORM_PREFIX, S3_TRANSFORM_PREFIX + "-date-partitioned")
-               .replace("year=", "dt=")
-               .replace("/month=", "-")
-               .replace("/day=", "-"))
+    return (
+        key.replace(S3_TRANSFORM_PREFIX, S3_TRANSFORM_PREFIX + "-date-partitioned")
+        .replace("year=", "dt=")
+        .replace("/month=", "-")
+        .replace("/day=", "-")
+    )
+
 
 def load(s3_bucket, s3_key) -> None:
     logger.info("Starting load task")

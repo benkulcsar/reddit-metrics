@@ -16,7 +16,7 @@ def test_fetch_new_posts_from_reddit(reddit_submissions):
     fake_reddit_client = FakeRedditClient(reddit_submissions)
     fetch_subs = fetch_new_submissions_from_reddit(reddit_client=fake_reddit_client, subreddit_list=["r/abc", "r/def"])
     fetch_none = fetch_new_submissions_from_reddit(reddit_client=fake_reddit_client, subreddit_list=["r/xyz"])
-    assert fetch_subs == reddit_submissions
+    assert sorted(fetch_subs, key=lambda d: d.get("id")) == sorted(reddit_submissions, key=lambda d: d.get("id"))
     assert fetch_none == []
 
 

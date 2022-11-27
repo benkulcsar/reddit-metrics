@@ -92,5 +92,7 @@ def get_subreddit_list():
             "ethereum",
             "python",
             "dataisbeautiful",
+            "dataengineering",
+            "datascience",
         ],
     )
