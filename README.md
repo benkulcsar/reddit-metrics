@@ -4,7 +4,7 @@
 
 ### Objective
 
-Create an ETL pipeline for a simple dashboard showing upvote ratios of selected subreddits over time:
+Create an ETL pipeline for a simple dashboard showing metrics of selected subreddits over time:
 
 **[Link to the dashboard](https://datastudio.google.com/reporting/865759fa-0b1a-4bee-8b67-89cb2ed0d2f0 "Looker Studio")**
 
