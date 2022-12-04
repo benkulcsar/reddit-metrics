@@ -1,6 +1,8 @@
+# --== EXTRACT ==-- #
+
 resource "aws_lambda_function" "reddit_extract_lambda" {
   package_type  = "Image"
-  image_uri     = "${aws_ecr_repository.reddit_extract.repository_url}@${data.aws_ecr_image.reddit_extract_image.image_digest}"
+  image_uri     = "${aws_ecr_repository.reddit_repos["extract"].repository_url}@${data.aws_ecr_image.reddit_images["extract"].image_digest}"
   function_name = "reddit-extract"
   role          = aws_iam_role.reddit_lambda_role.arn
   timeout       = "900"
@@ -19,9 +21,11 @@ resource "aws_lambda_function" "reddit_extract_lambda" {
   }
 }
 
+# --== TRANSFORM ==-- #
+
 resource "aws_lambda_function" "reddit_transform_lambda" {
   package_type  = "Image"
-  image_uri     = "${aws_ecr_repository.reddit_transform.repository_url}@${data.aws_ecr_image.reddit_transform_image.image_digest}"
+  image_uri     = "${aws_ecr_repository.reddit_repos["transform"].repository_url}@${data.aws_ecr_image.reddit_images["transform"].image_digest}"
   function_name = "reddit-transform"
   role          = aws_iam_role.reddit_lambda_role.arn
   timeout       = "300"
@@ -38,9 +42,11 @@ resource "aws_lambda_function" "reddit_transform_lambda" {
   }
 }
 
+# --== LOAD ==-- #
+
 resource "aws_lambda_function" "reddit_load_lambda" {
   package_type  = "Image"
-  image_uri     = "${aws_ecr_repository.reddit_load.repository_url}@${data.aws_ecr_image.reddit_load_image.image_digest}"
+  image_uri     = "${aws_ecr_repository.reddit_repos["load"].repository_url}@${data.aws_ecr_image.reddit_images["load"].image_digest}"
   function_name = "reddit-load"
   role          = aws_iam_role.reddit_lambda_role.arn
   timeout       = "300"
@@ -54,6 +60,8 @@ resource "aws_lambda_function" "reddit_load_lambda" {
     }
   }
 }
+
+# --== MONITORING ==-- #
 
 resource "aws_lambda_function" "reddit_monitoring_sns" {
   filename         = "./sns_lambda/sns_lambda.zip"
