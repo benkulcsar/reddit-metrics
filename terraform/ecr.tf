@@ -1,5 +1,14 @@
-resource "aws_ecr_repository" "reddit_extract" {
-  name                 = "reddit-extract"
+locals {
+  reddit_repos = {
+    extract : { repo_name : "reddit-extract" },
+    transform : { repo_name : "reddit-transform" },
+    load : { repo_name : "reddit-load" }
+  }
+}
+
+resource "aws_ecr_repository" "reddit_repos" {
+  for_each             = local.reddit_repos
+  name                 = each.value.repo_name
   image_tag_mutability = "MUTABLE"
 
   image_scanning_configuration {
@@ -7,36 +16,8 @@ resource "aws_ecr_repository" "reddit_extract" {
   }
 }
 
-data "aws_ecr_image" "reddit_extract_image" {
-  repository_name = aws_ecr_repository.reddit_extract.name
-  image_tag       = "latest"
-}
-
-resource "aws_ecr_repository" "reddit_transform" {
-  name                 = "reddit-transform"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = false
-  }
-}
-
-data "aws_ecr_image" "reddit_transform_image" {
-  repository_name = aws_ecr_repository.reddit_transform.name
-  image_tag       = "latest"
-}
-
-
-resource "aws_ecr_repository" "reddit_load" {
-  name                 = "reddit-load"
-  image_tag_mutability = "MUTABLE"
-
-  image_scanning_configuration {
-    scan_on_push = false
-  }
-}
-
-data "aws_ecr_image" "reddit_load_image" {
-  repository_name = aws_ecr_repository.reddit_load.name
+data "aws_ecr_image" "reddit_images" {
+  for_each        = local.reddit_repos
+  repository_name = each.value.repo_name
   image_tag       = "latest"
 }

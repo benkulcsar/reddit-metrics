@@ -111,8 +111,9 @@ python src/transform.py -b bucket_name -k obj_key2
 * [X] Add new metrics (e.g. number of posts)
 * [X] Dashboard improvements (e.g. moving average)
 * [X] Review list of subreddits
-* [ ] Make Terraform code DRY
+* [X] Make Terraform code DRY
 * [ ] Catch and handle exceptions that don't have to stop the lambdas
 * [ ] Create ECR repos with Terraform before deploying (see note in Deployment section)
 * [ ] Test the actual ETL methods in integration tests
+* [ ] Improve code readability
 * [ ] Transformation without pandas
