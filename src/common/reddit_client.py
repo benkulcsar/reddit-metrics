@@ -1,10 +1,19 @@
 from __future__ import annotations
 
+import logging
 from abc import ABC
 from abc import abstractmethod
 from datetime import datetime
 
 from praw import Reddit
+from prawcore.exceptions import Forbidden
+
+
+if logging.getLogger().hasHandlers():
+    logging.getLogger().setLevel(logging.INFO)
+else:
+    logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class AbstractRedditClient(ABC):
@@ -40,20 +49,24 @@ class RedditClient(AbstractRedditClient):
 
         submission_generator = self.reddit.subreddit(subreddit_name).new(limit=fetch_count)
 
-        return [
-            {
-                "id": submission.id,
-                "subreddit_display_name": submission.subreddit.display_name,
-                "upvote_ratio": submission.upvote_ratio,
-                "ups": submission.ups,
-                "downs": submission.downs,
-                "total_awards_received": submission.total_awards_received,
-                "num_comments": submission.num_comments,
-                "created_utc": submission.created_utc,
-                "extracted_utc": datetime.utcnow().timestamp(),
-            }
-            for submission in submission_generator
-        ]
+        try:
+            return [
+                {
+                    "id": submission.id,
+                    "subreddit_display_name": submission.subreddit.display_name,
+                    "upvote_ratio": submission.upvote_ratio,
+                    "ups": submission.ups,
+                    "downs": submission.downs,
+                    "total_awards_received": submission.total_awards_received,
+                    "num_comments": submission.num_comments,
+                    "created_utc": submission.created_utc,
+                    "extracted_utc": datetime.utcnow().timestamp(),
+                }
+                for submission in submission_generator
+            ]
+        except Forbidden:
+            logger.error(f"Couldn't fetch submissions due to Forbidden error from subreddit: {subreddit_name}")
+            return []
 
 
 class FakeRedditClient(ABC):

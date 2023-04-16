@@ -54,7 +54,6 @@ def get_subreddit_list():
             "london",
             "LosAngeles",
             "glasgow",
-            "Edinburgh",
             "chicago",
             "IndiaSpeaks",
             "HongKong",

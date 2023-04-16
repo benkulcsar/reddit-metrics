@@ -43,7 +43,8 @@ def fetch_new_submissions_from_reddit(
             subreddit_name=subreddit_name,
             fetch_count=POST_FETCH_COUNT,
         )
-        submission_list.extend(subreddit_submission_list)
+        if len(subreddit_submission_list) > 0:
+            submission_list.extend(subreddit_submission_list)
     return submission_list
 
 
