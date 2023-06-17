@@ -2,8 +2,8 @@ resource "aws_iam_role" "reddit_lambda_role" {
   name               = "reddit-lambda-role"
   assume_role_policy = data.aws_iam_policy_document.lambda_assume_role.json
   inline_policy {
-    name   = "log_and_access_s3"
-    policy = data.aws_iam_policy_document.log_and_access_s3.json
+    name   = "log_s3_ssm"
+    policy = data.aws_iam_policy_document.log_s3_ssm.json
   }
 }
 
@@ -17,7 +17,7 @@ data "aws_iam_policy_document" "lambda_assume_role" {
   }
 }
 
-data "aws_iam_policy_document" "log_and_access_s3" {
+data "aws_iam_policy_document" "log_s3_ssm" {
   statement {
     actions = [
       "logs:CreateLogGroup",
@@ -32,6 +32,10 @@ data "aws_iam_policy_document" "log_and_access_s3" {
       "s3-object-lambda:*"
     ]
     resources = [aws_s3_bucket.reddit.arn, "${aws_s3_bucket.reddit.arn}/*"]
+  }
+  statement {
+    actions   = ["ssm:GetParameter"]
+    resources = ["*"]
   }
 }
 
