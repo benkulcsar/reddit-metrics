@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import boto3
 
 
 def get_reddit_client_id():
@@ -44,54 +45,6 @@ def get_post_fetch_count():
 
 
 def get_subreddit_list():
-    return sorted(
-        [
-            "canada",
-            "europe",
-            "nyc",
-            "China",
-            "sanfrancisco",
-            "london",
-            "LosAngeles",
-            "glasgow",
-            "chicago",
-            "IndiaSpeaks",
-            "HongKong",
-            "ukraine",
-            "germany",
-            "spain",
-            "greece",
-            "ireland",
-            "hungary",
-            "Turkey",
-            "thenetherlands",
-            "Romania",
-            "portugal",
-            "india",
-            "manchester",
-            "Dublin",
-            "paris",
-            "Barcelona",
-            "berlin",
-            "Munich",
-            "Madrid",
-            "Amsterdam",
-            "politics",
-            "CryptoCurrency",
-            "wallstreetbets",
-            "Bitcoin",
-            "atheism",
-            "StockMarket",
-            "ethtrader",
-            "CryptoMoonShots",
-            "conspiracy",
-            "elonmusk",
-            "southpark",
-            "childfree",
-            "ethereum",
-            "python",
-            "dataisbeautiful",
-            "dataengineering",
-            "datascience",
-        ],
-    )
+    ssm = boto3.client("ssm")
+    parameter = ssm.get_parameter(Name="SubredditList", WithDecryption=True)
+    return sorted(parameter["Parameter"]["Value"].split(","))
