@@ -1,45 +1,38 @@
 # Reddit Metrics
 
-## About the Project
+## What's this?
 
-### Objective
-
-Create an ETL pipeline for a simple dashboard showing metrics of selected subreddits over time:
+This repository is dedicated to one of my hobby projects, which focuses on visualising upvote ratios and other metrics for selected subreddits.
 
 **[Link to the dashboard](https://datastudio.google.com/reporting/865759fa-0b1a-4bee-8b67-89cb2ed0d2f0 "Looker Studio")**
 
 !["Dashboard"](images/dash.png?v=4&s=200 "Dashboard")
 
-### Roadmap
-
-* [x] AWS infra
-* [x] Extract (lambda)
-* [X] Transform (lambda)
-* [X] Load (lambda)
-* [X] Dashboard (looker studio)
-* [X] Improvements from the "must have" backlog
-* [ ] Improvements from the "nice to have" backlog (see below)
+## How was it built?
 
 ### Tools
 
+The project was developed using the following tools:
+
 - Python 3.9
 - Docker, Make and Terraform
-- AWS: S3, Lambda, EventBridge and ECR (with Terraform)
-- GCP: GCS, BigQuery and Looker Studio
+- AWS: S3, Lambda, EventBridge and ECR (managed by Terraform)
+- GCP: GCS, BigQuery, and Looker Studio
 
 ### High Level Architecture
 
 !["Architecture"](images/architecture.png?v=4&s=200 "Architecture")
 
-Lambda functions are deployed using docker images.
+The project utilises Lambda functions deployed as Docker images.
 
-SNS is used for email alerting. A separate lambda function is subscribed to CloudWatch logs and forwards the ones containing errors to SNS.
+Additionally, SNS is used for email alerting. A separate Lambda function subscribes to CloudWatch logs and forwards any error-containing logs to SNS.
 
-## Deploy and Run
+## How to deploy and run this?
 
+The following instructions are provided for future reference when fixing or modifying the project.
 ### Environment Variables
 
-The project requires the following environment variables to be set:
+Ensure that the following environment variables are set before running the project:
 
 - `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` (except if running in AWS)
 - `AWS_ACC_NO` and `AWS_REGION` (for ECR)
@@ -75,9 +68,9 @@ python src/load.py -b [BUCKET] -k [KEY]
 
 ### Deploy
 
-Deploying in AWS requires terraform set up to use an S3 backend.
+For deployment on AWS, it is necessary to set up Terraform with an S3 backend.
 
-*Note: the ECR repos have to be created first which requires a terraform apply that eventually fails when trying to create the lambdas without the docker images.*
+*Note: Before deploying for the first time, the ECR repositories must be created. To create them, execute a Terraform apply command, which will eventually fail when attempting to create the Lambdas without the Docker images.*
 
 ```bash
 make terraform-init
@@ -88,7 +81,8 @@ make deploy-load
 
 ### Re-running / Backfilling
 
-Both the transform and the load lambdas can be triggered with a custom test event specifying a list of objects that enables re-running / backfilling.
+Both the transform and load Lambdas can be triggered using a custom test event that specifies a list of objects. This enables re-running or backfilling functionality.
+
 Format of the event:
 ```json
 {
@@ -99,21 +93,10 @@ Format of the event:
 }
 ```
 
-Alternatively, a series of local runs can achieve the same result, for example:
+Alternatively, the same result can be achieved by a series of local runs.
+
+Example:
 ```bash
 python src/transform.py -b bucket_name -k obj_key1
 python src/transform.py -b bucket_name -k obj_key2
 ```
-
-## Backlog (nice to haves)
-
-* [X] Add `num_comments` to the RedditPost model
-* [X] Add new metrics (e.g. number of posts)
-* [X] Dashboard improvements (e.g. moving average)
-* [X] Review list of subreddits
-* [X] Make Terraform code DRY
-* [ ] Catch and handle exceptions that don't have to stop the lambdas
-* [ ] Create ECR repos with Terraform before deploying (see note in Deployment section)
-* [ ] Test the actual ETL methods in integration tests
-* [ ] Improve code readability
-* [ ] Transformation without pandas
