@@ -2,7 +2,7 @@
 
 ## What's this?
 
-This repository is dedicated to one of my hobby projects, which focuses on visualizing upvote ratios and other metrics for selected subreddits.
+This repository is dedicated to one of my hobby projects, which focuses on visualising upvote ratios and other metrics for selected subreddits.
 
 **[Link to the dashboard](https://datastudio.google.com/reporting/865759fa-0b1a-4bee-8b67-89cb2ed0d2f0 "Looker Studio")**
 
@@ -12,7 +12,7 @@ This repository is dedicated to one of my hobby projects, which focuses on visua
 
 ### Tools
 
-The project was developed using the following tools
+The project was developed using the following tools:
 
 - Python 3.9
 - Docker, Make and Terraform
